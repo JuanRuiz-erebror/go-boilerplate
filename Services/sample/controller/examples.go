@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"goprueba/modules/sample/httputil"
+	"goprueba/utils"
 	"net/http"
 	"strconv"
 
@@ -40,12 +40,12 @@ func (c *Controller) PingExample(ctx *gin.Context) {
 func (c *Controller) CalcExample(ctx *gin.Context) {
 	val1, err := strconv.Atoi(ctx.Query("val1"))
 	if err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		utils.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
 	val2, err := strconv.Atoi(ctx.Query("val2"))
 	if err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		utils.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
 	ans := val1 + val2
@@ -68,12 +68,12 @@ func (c *Controller) CalcExample(ctx *gin.Context) {
 func (c *Controller) PathParamsExample(ctx *gin.Context) {
 	groupID, err := strconv.Atoi(ctx.Param("group_id"))
 	if err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		utils.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
 	accountID, err := strconv.Atoi(ctx.Param("account_id"))
 	if err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		utils.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
 	ctx.String(http.StatusOK, "group_id=%d account_id=%d", groupID, accountID)

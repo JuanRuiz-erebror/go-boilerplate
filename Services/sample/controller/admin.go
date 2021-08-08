@@ -3,8 +3,8 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"goprueba/modules/sample/httputil"
-	"goprueba/modules/sample/model"
+	"goprueba/Services/sample/model"
+	"goprueba/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,20 +17,20 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.Admin
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 401 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
+// @Failure 400 {object} utils.HTTPError
+// @Failure 401 {object} utils.HTTPError
+// @Failure 404 {object} utils.HTTPError
+// @Failure 500 {object} utils.HTTPError
 // @Security ApiKeyAuth
 // @Router /admin/auth [post]
 func (c *Controller) Auth(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
 	if len(authHeader) == 0 {
-		httputil.NewError(ctx, http.StatusBadRequest, errors.New("please set Header Authorization"))
+		utils.NewError(ctx, http.StatusBadRequest, errors.New("please set Header Authorization"))
 		return
 	}
 	if authHeader != "admin" {
-		httputil.NewError(ctx, http.StatusUnauthorized, fmt.Errorf("this user isn't authorized to operation key=%s expected=admin", authHeader))
+		utils.NewError(ctx, http.StatusUnauthorized, fmt.Errorf("this user isn't authorized to operation key=%s expected=admin", authHeader))
 		return
 	}
 	admin := model.Admin{
