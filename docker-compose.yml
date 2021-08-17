@@ -1,12 +1,27 @@
 version: "3.3"
 services:
-  web:
+  main_auth:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: prueba_go_prod
+      dockerfile: dev.Dockerfile
+    container_name: auth_prod
     ports:
-      - 4010:4000
+      - 5010:4010
+    # depends_on:
+    #   - mysql
+    volumes:
+      - ./:/app
+  main_sample:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    container_name: main_prod
+    ports:
+      - 5000:4000
+    # depends_on:
+    #   - mysql
+    volumes:
+      - ./:/app
     # depends_on:
     #   - mysql
     # volumes:

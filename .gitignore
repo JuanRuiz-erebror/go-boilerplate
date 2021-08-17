@@ -12,9 +12,13 @@ cover.out
 *.out
 .idea
 .vscode
+.env
 
 # Etc
 .DS_Store
+
+/tmp
+main
 
 /swag
 /swag.exe

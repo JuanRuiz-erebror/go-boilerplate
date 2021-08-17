@@ -1,16 +1,24 @@
 version: "3.3"
 services:
-  web:
+  # main_auth:
+  #   build:
+  #     context: .
+  #     dockerfile: dev.Dockerfile
+  #   container_name: auth_dev
+  #   ports:
+  #     - 4010:4010
+  #   # depends_on:
+  #   #   - mysql
+  #   volumes:
+  #     - ./:/app
+  main:
     build:
       context: .
       dockerfile: dev.Dockerfile
-<<<<<<< HEAD
-    container_name: goprueba_dev
-=======
-    container_name: go_dev
->>>>>>> bfb91827980f6ee240530d0a0e730e6c5fc3ac8c
+    container_name: main_dev
     ports:
       - 4000:4000
+      - 4010:4010
     # depends_on:
     #   - mysql
     volumes:

@@ -14,4 +14,4 @@ RUN go get github.com/githubnemo/CompileDaemon
 
 EXPOSE 4000
 
-ENTRYPOINT CompileDaemon --build="go build main.go" --command=./main
+ENTRYPOINT CompileDaemon --build="go build /cmd/main.go" --command=./main
