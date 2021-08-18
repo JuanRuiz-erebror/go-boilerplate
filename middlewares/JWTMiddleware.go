@@ -1,27 +1,20 @@
 package middleware
 
 import (
-	"fmt"
 	"goprueba/Services/auth/service"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-func AuthorizeJWT() gin.HandlerFunc {
+func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		const BEARER_SCHEMA = "Bearer"
-		authHeader := c.GetHeader("Authorization")
-		tokenString := authHeader[len(BEARER_SCHEMA):]
-		token, err := service.JWTAuthService().ValidateToken(tokenString)
-		if token.Valid {
-			claims := token.Claims.(jwt.MapClaims)
-			fmt.Println(claims)
-		} else {
-			fmt.Println(err)
-			c.AbortWithStatus(http.StatusUnauthorized)
+		err := service.TokenValid(c.Request)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, err.Error())
+			c.Abort()
+			return
 		}
-
+		c.Next()
 	}
 }

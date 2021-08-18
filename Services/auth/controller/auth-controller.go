@@ -3,6 +3,7 @@ package controller
 import (
 	"goprueba/Services/auth/dto"
 	"goprueba/Services/auth/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,29 +13,29 @@ type LoginController interface {
 	Login(ctx *gin.Context) string
 }
 
-type loginController struct {
-	loginService service.LoginService
-	jWtService   service.JWTService
-}
-
-func LoginHandler(loginService service.LoginService,
-	jWtService service.JWTService) LoginController {
-	return &loginController{
-		loginService: loginService,
-		jWtService:   jWtService,
+func Login(c *gin.Context) {
+	var u dto.User
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+		return
 	}
-}
-
-func (controller *loginController) Login(ctx *gin.Context) string {
-	var credential dto.LoginCredentials
-	err := ctx.ShouldBind(&credential)
+	//compare the user from the request, with the one we defined:
+	if dto.UserTest.Name != u.Name || dto.UserTest.Password != u.Password {
+		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
+		return
+	}
+	ts, err := service.CreateToken(dto.UserTest.ID)
 	if err != nil {
-		return "no data found"
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
 	}
-	isUserAuthenticated := controller.loginService.LoginUser(credential.Email, credential.Password)
-	if isUserAuthenticated {
-		return controller.jWtService.GenerateToken(credential.Email, true)
-
+	saveErr := service.CreateAuth(dto.UserTest.ID, ts)
+	if saveErr != nil {
+		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}
-	return ""
+	tokens := map[string]string{
+		"access_token":  ts.AccessToken,
+		"refresh_token": ts.RefreshToken,
+	}
+	c.JSON(http.StatusOK, tokens)
 }

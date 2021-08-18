@@ -16,9 +16,20 @@ type LoginCredentials struct {
 }
 
 type User struct {
-	ID    int    `json:"id" example:"1"`
-	Name  string `json:"name" example:"bottle_name"`
-	Email string `json:"email"`
+	ID uint64 `json:"id"`
+	//	ID       int    `json:"id" example:"1"`
+	Name     string `json:"name" example:"bottle_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+}
+
+var UserTest = User{
+	ID:       1,
+	Name:     "username",
+	Email:    "mmmmm",
+	Password: "password",
+	Phone:    "49123454322", //this is a random number
 }
 
 var users = []User{

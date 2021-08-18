@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"goprueba/Services/auth/dto"
+	"goprueba/cmd"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 //jwt service
 type JWTService interface {
 	//GenerateToken(email string, isUser bool) string
+	CreateAuth(userId uint64, t *dto.TokenDetails)
 	CreateToken(userid uint64) (*dto.TokenDetails, error)
 	VerifyToken(r *http.Request) (*jwt.Token, error)
 }
@@ -26,17 +28,16 @@ type authCustomClaims struct {
 	jwt.StandardClaims
 }
 
-type jwtServices struct {
-	secretKey string
-	issure    string
-}
-
 //auth-jwt
-func JWTAuthService() JWTService {
-	return &jwtServices{
-		secretKey: getSecretKey(),
-		issure:    "Bikash",
+func TokenValid(r *http.Request) error {
+	token, err := VerifyToken(r)
+	if err != nil {
+		return err
 	}
+	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+		return err
+	}
+	return nil
 }
 
 func getSecretKey() string {
@@ -47,7 +48,7 @@ func getSecretKey() string {
 	return secret
 }
 
-func (service *jwtServices) CreateToken(userid uint64) (*dto.TokenDetails, error) {
+func CreateToken(userid uint64) (*dto.TokenDetails, error) {
 	td := &dto.TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	td.AccessUuid = uuid.NewV4().String()
@@ -87,11 +88,13 @@ func CreateAuth(userid uint64, td *dto.TokenDetails) error {
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
 
-	errAccess := cmd.RedisClient.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
+	var redisC = cmd.GerRedisClient()
+
+	errAccess := redisC.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
 	if errAccess != nil {
 		return errAccess
 	}
-	errRefresh := cmd.RedisClient.Set(td.RefreshUuid, strconv.Itoa(int(userid)), rt.Sub(now)).Err()
+	errRefresh := redisC.Set(td.RefreshUuid, strconv.Itoa(int(userid)), rt.Sub(now)).Err()
 	if errRefresh != nil {
 		return errRefresh
 	}
@@ -108,7 +111,7 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
-func (service *jwtServices) VerifyToken(r *http.Request) (*jwt.Token, error) {
+func VerifyToken(r *http.Request) (*jwt.Token, error) {
 	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		//Make sure that the token method conform to "SigningMethodHMAC"

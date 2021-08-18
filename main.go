@@ -8,7 +8,7 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
-var RedisClient *redis.Client
+var redisClient *redis.Client
 
 func Redis() {
 	//Initializing redis
@@ -16,13 +16,15 @@ func Redis() {
 	if len(dsn) == 0 {
 		dsn = "localhost:6379"
 	}
-	RedisClient = redis.NewClient(&redis.Options{
+	redisClient = redis.NewClient(&redis.Options{
 		Addr: dsn, //redis port
 	})
-	_, err := RedisClient.Ping().Result()
+	_, err := redisClient.Ping().Result()
 	if err != nil {
 		panic(err)
 	}
+
+	cmd.SetRedisClient(redisClient)
 }
 
 //var ctx = context.TODO()
@@ -72,7 +74,6 @@ func Redis() {
 func main() {
 	infrastructure.LoadEnv()
 
-	cmd.Redis()
 	cmd.Mauth()
 
 	cmd.Sample()
