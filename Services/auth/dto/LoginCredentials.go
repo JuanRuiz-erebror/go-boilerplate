@@ -1,5 +1,14 @@
 package dto
 
+type TokenDetails struct {
+	AccessToken  string
+	RefreshToken string
+	AccessUuid   string
+	RefreshUuid  string
+	AtExpires    int64
+	RtExpires    int64
+}
+
 //Login credential
 type LoginCredentials struct {
 	Email    string `form:"email"`

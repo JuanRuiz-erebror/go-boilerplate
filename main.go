@@ -3,7 +3,27 @@ package main
 import (
 	"goprueba/cmd"
 	"goprueba/infrastructure"
+	"os"
+
+	"github.com/go-redis/redis/v7"
 )
+
+var RedisClient *redis.Client
+
+func Redis() {
+	//Initializing redis
+	dsn := os.Getenv("REDIS_DSN")
+	if len(dsn) == 0 {
+		dsn = "localhost:6379"
+	}
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr: dsn, //redis port
+	})
+	_, err := RedisClient.Ping().Result()
+	if err != nil {
+		panic(err)
+	}
+}
 
 //var ctx = context.TODO()
 
@@ -52,6 +72,7 @@ import (
 func main() {
 	infrastructure.LoadEnv()
 
+	cmd.Redis()
 	cmd.Mauth()
 
 	cmd.Sample()

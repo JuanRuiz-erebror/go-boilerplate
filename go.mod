@@ -15,6 +15,7 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-pkgz/auth v1.17.0 // indirect
 	github.com/go-pkgz/rest v1.11.0 // indirect
+	github.com/go-redis/redis/v7 v7.4.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -32,6 +33,7 @@ require (
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0 // indirect
+	github.com/twinj/uuid v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.0.1 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
