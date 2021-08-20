@@ -1,10 +1,10 @@
-package cmd
+package Redis
 
 import "github.com/go-redis/redis/v7"
 
 var RedisClient *redis.Client
 
-func GerRedisClient() *redis.Client {
+func GetRedisClient() *redis.Client {
 	return RedisClient
 }
 

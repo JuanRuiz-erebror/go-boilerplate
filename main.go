@@ -1,6 +1,7 @@
 package main
 
 import (
+	"goprueba/Services/Redis"
 	"goprueba/cmd"
 	"goprueba/infrastructure"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 var redisClient *redis.Client
 
-func Redis() {
+func MainRedis() {
 	//Initializing redis
 	dsn := os.Getenv("REDIS_DSN")
 	if len(dsn) == 0 {
@@ -24,7 +25,7 @@ func Redis() {
 		panic(err)
 	}
 
-	cmd.SetRedisClient(redisClient)
+	Redis.SetRedisClient(redisClient)
 }
 
 //var ctx = context.TODO()
@@ -74,7 +75,7 @@ func Redis() {
 func main() {
 	infrastructure.LoadEnv()
 
-	cmd.Mauth()
+	cmd.MainAuth()
 
 	cmd.Sample()
 

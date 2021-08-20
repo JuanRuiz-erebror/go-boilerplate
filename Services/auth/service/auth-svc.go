@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
+	"goprueba/Services/Redis"
 	"goprueba/Services/auth/dto"
-	"goprueba/cmd"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/twinj/uuid"
 )
 
@@ -27,6 +28,18 @@ type authCustomClaims struct {
 	User bool   `json:"user"`
 	jwt.StandardClaims
 }
+
+type AccessDetails struct {
+	AccessUuid string
+	UserId     uint64
+}
+
+type Todo struct {
+	UserID uint64 `json:"user_id"`
+	Title  string `json:"title"`
+}
+
+var redisC = Redis.GetRedisClient()
 
 //auth-jwt
 func TokenValid(r *http.Request) error {
@@ -88,8 +101,6 @@ func CreateAuth(userid uint64, td *dto.TokenDetails) error {
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
 
-	var redisC = cmd.GerRedisClient()
-
 	errAccess := redisC.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
 	if errAccess != nil {
 		return errAccess
@@ -124,4 +135,59 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 		return nil, err
 	}
 	return token, nil
+}
+
+func ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
+	token, err := VerifyToken(r)
+	if err != nil {
+		return nil, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		accessUuid, ok := claims["access_uuid"].(string)
+		if !ok {
+			return nil, err
+		}
+		userId, err := strconv.ParseUint(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return &AccessDetails{
+			AccessUuid: accessUuid,
+			UserId:     userId,
+		}, nil
+	}
+	return nil, err
+}
+
+func FetchAuth(authD *AccessDetails) (uint64, error) {
+	userid, err := redisC.Get(authD.AccessUuid).Result()
+	if err != nil {
+		return 0, err
+	}
+	userID, _ := strconv.ParseUint(userid, 10, 64)
+	return userID, nil
+}
+
+func CreateTodo(c *gin.Context) {
+	var td *Todo
+	if err := c.ShouldBindJSON(&td); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "invalid json")
+		return
+	}
+	tokenAuth, err := ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	userId, err = FetchAuth(tokenAuth)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	td.UserID = userId
+
+	//you can proceed to save the Todo to a database
+	//but we will just return it to the caller here:
+	c.JSON(http.StatusCreated, td)
 }

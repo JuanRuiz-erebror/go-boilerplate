@@ -9,12 +9,6 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-//Login credential
-type LoginCredentials struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
 type User struct {
 	ID uint64 `json:"id"`
 	//	ID       int    `json:"id" example:"1"`
