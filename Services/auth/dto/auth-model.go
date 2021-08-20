@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/golang-jwt/jwt"
+
 type TokenDetails struct {
 	AccessToken  string
 	RefreshToken string
@@ -16,6 +18,22 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
+}
+
+type authCustomClaims struct {
+	Name string `json:"name"`
+	User bool   `json:"user"`
+	jwt.StandardClaims
+}
+
+type AccessDetails struct {
+	AccessUuid string
+	UserId     uint64
+}
+
+type Todo struct {
+	UserID uint64 `json:"user_id"`
+	Title  string `json:"title"`
 }
 
 var UserTest = User{

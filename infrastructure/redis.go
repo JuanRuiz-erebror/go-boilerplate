@@ -1,4 +1,4 @@
-package Redis
+package infrastructure
 
 import "github.com/go-redis/redis/v7"
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"goprueba/Services/Redis"
 	"goprueba/cmd"
 	"goprueba/infrastructure"
 	"os"
@@ -25,7 +24,7 @@ func MainRedis() {
 		panic(err)
 	}
 
-	Redis.SetRedisClient(redisClient)
+	infrastructure.SetRedisClient(redisClient)
 }
 
 //var ctx = context.TODO()

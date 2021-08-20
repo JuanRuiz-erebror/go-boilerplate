@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"goprueba/Services/auth/service"

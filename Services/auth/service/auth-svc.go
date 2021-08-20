@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"goprueba/Services/Redis"
 	"goprueba/Services/auth/dto"
+	"goprueba/infrastructure"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"github.com/twinj/uuid"
 )
 
@@ -23,23 +22,7 @@ type JWTService interface {
 	VerifyToken(r *http.Request) (*jwt.Token, error)
 }
 
-type authCustomClaims struct {
-	Name string `json:"name"`
-	User bool   `json:"user"`
-	jwt.StandardClaims
-}
-
-type AccessDetails struct {
-	AccessUuid string
-	UserId     uint64
-}
-
-type Todo struct {
-	UserID uint64 `json:"user_id"`
-	Title  string `json:"title"`
-}
-
-var redisC = Redis.GetRedisClient()
+var redisC = infrastructure.GetRedisClient()
 
 //auth-jwt
 func TokenValid(r *http.Request) error {
@@ -71,7 +54,7 @@ func CreateToken(userid uint64) (*dto.TokenDetails, error) {
 
 	var err error
 	//Creating Access Token
-	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
+	//os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.AccessUuid
@@ -137,7 +120,7 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 	return token, nil
 }
 
-func ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
+func ExtractTokenMetadata(r *http.Request) (*dto.AccessDetails, error) {
 	token, err := VerifyToken(r)
 	if err != nil {
 		return nil, err
@@ -152,7 +135,7 @@ func ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &AccessDetails{
+		return &dto.AccessDetails{
 			AccessUuid: accessUuid,
 			UserId:     userId,
 		}, nil
@@ -160,7 +143,7 @@ func ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
 	return nil, err
 }
 
-func FetchAuth(authD *AccessDetails) (uint64, error) {
+func FetchAuth(authD *dto.AccessDetails) (uint64, error) {
 	userid, err := redisC.Get(authD.AccessUuid).Result()
 	if err != nil {
 		return 0, err
@@ -169,25 +152,10 @@ func FetchAuth(authD *AccessDetails) (uint64, error) {
 	return userID, nil
 }
 
-func CreateTodo(c *gin.Context) {
-	var td *Todo
-	if err := c.ShouldBindJSON(&td); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "invalid json")
-		return
-	}
-	tokenAuth, err := ExtractTokenMetadata(c.Request)
+func DeleteAuth(givenUuid string) (int64, error) {
+	deleted, err := redisC.Del(givenUuid).Result()
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
+		return 0, err
 	}
-	userId, err = FetchAuth(tokenAuth)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
-	}
-	td.UserID = userId
-
-	//you can proceed to save the Todo to a database
-	//but we will just return it to the caller here:
-	c.JSON(http.StatusCreated, td)
+	return deleted, nil
 }
