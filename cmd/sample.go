@@ -79,6 +79,9 @@ func Sample() {
 		accounts.PATCH(":id", c.UpdateAccount)
 		accounts.POST(":id/images", c.UploadAccountImage)
 
+		bras := v1.Group("/bras")
+		bras.GET("", c.ListBras)
+
 		bottles := v1.Group("/bottles")
 		//bottles.Use(ginoauth2.Auth(zalando.UidCheck(USERS), zalando.OAuth2Endpoint))
 

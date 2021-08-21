@@ -22,8 +22,6 @@ type JWTService interface {
 	VerifyToken(r *http.Request) (*jwt.Token, error)
 }
 
-var redisC = infrastructure.GetRedisClient()
-
 //auth-jwt
 func TokenValid(r *http.Request) error {
 	token, err := VerifyToken(r)
@@ -84,10 +82,16 @@ func CreateAuth(userid uint64, td *dto.TokenDetails) error {
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
 
+	redisC := infrastructure.RedisClient
+	gg := at.Sub(now)
+	fmt.Printf("gg: %v\n", gg)
+	fmt.Printf("redisC: %v\n", redisC)
 	errAccess := redisC.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
 	if errAccess != nil {
 		return errAccess
 	}
+
+	println(("redis aaccess ok"))
 	errRefresh := redisC.Set(td.RefreshUuid, strconv.Itoa(int(userid)), rt.Sub(now)).Err()
 	if errRefresh != nil {
 		return errRefresh
@@ -144,6 +148,7 @@ func ExtractTokenMetadata(r *http.Request) (*dto.AccessDetails, error) {
 }
 
 func FetchAuth(authD *dto.AccessDetails) (uint64, error) {
+	redisC := infrastructure.RedisClient
 	userid, err := redisC.Get(authD.AccessUuid).Result()
 	if err != nil {
 		return 0, err
@@ -153,6 +158,7 @@ func FetchAuth(authD *dto.AccessDetails) (uint64, error) {
 }
 
 func DeleteAuth(givenUuid string) (int64, error) {
+	redisC := infrastructure.RedisClient
 	deleted, err := redisC.Del(givenUuid).Result()
 	if err != nil {
 		return 0, err

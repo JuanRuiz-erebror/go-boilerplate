@@ -1,6 +1,11 @@
 package dto
 
-import "github.com/golang-jwt/jwt"
+import (
+	"goprueba/infrastructure"
+
+	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type TokenDetails struct {
 	AccessToken  string
@@ -18,6 +23,12 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
+}
+
+func UserCollection() *mongo.Collection {
+	Db := infrastructure.GetDB()
+	col := Db.Collection("User")
+	return col
 }
 
 type authCustomClaims struct {

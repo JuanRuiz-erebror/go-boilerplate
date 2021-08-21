@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"goprueba/Services/auth/dto"
+	"goprueba/Services/auth/repository"
 	"goprueba/Services/auth/service"
 	"net/http"
 	"os"
@@ -23,17 +24,29 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 		return
 	}
-	//compare the user from the request, with the one we defined:
-	if dto.UserTest.Name != u.Name || dto.UserTest.Password != u.Password {
-		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
-		return
-	}
-	ts, err := service.CreateToken(dto.UserTest.ID)
+
+	fmt.Printf("u: %v\n", u)
+
+	foundUser, err := repository.GetUserByEmail(u.Email)
+	fmt.Printf("err3333: %v\n", err)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	saveErr := service.CreateAuth(dto.UserTest.ID, ts)
+
+	fmt.Printf("foundUser: %v\n", foundUser)
+	//compare the user from the request, with the one we defined:
+	if foundUser.Email != u.Email || u.Password != foundUser.Password {
+		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
+		return
+	}
+	ts, err := service.CreateToken(foundUser.ID)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	fmt.Printf("tssssssss: %v\n", ts)
+	saveErr := service.CreateAuth(foundUser.ID, ts)
 	if saveErr != nil {
 		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}

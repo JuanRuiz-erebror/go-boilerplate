@@ -1,16 +1,6 @@
 version: "3.3"
 services:
-  # main_auth:
-  #   build:
-  #     context: .
-  #     dockerfile: dev.Dockerfile
-  #   container_name: auth_dev
-  #   ports:
-  #     - 4010:4010
-  #   # depends_on:
-  #   #   - mysql
-  #   volumes:
-  #     - ./:/app
+
   main:
     build:
       context: .
@@ -23,6 +13,7 @@ services:
     #   - mysql
     volumes:
       - ./:/app
+
 #   mysql:
 #     image: mysql:5.7 
 #     container_name: menekel_mysql
@@ -38,3 +29,44 @@ services:
 #       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
 #       timeout: 5s
 #       retries: 10
+
+  redis:
+    image: "redis:alpine"
+    command: redis-server
+    container_name: redis
+    #command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    ports:
+    - "6379:6379"
+
+    # volumes:
+    # - $PWD/redis-data:/var/lib/redis
+    #   - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+    # environment:
+    # - REDIS_REPLICATION_MODE=master
+
+    # networks:
+    #   node_net:
+    #     ipv4_address: 172.28.1.4
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy:latest
+    #image: powerbim/powerbim_nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - 80:80
+      - 443:443
+    #environment:      
+    #   - VIRTUAL_PROTO=https
+    #   - VIRTUAL_PORT=443
+    #  - CERT_NAME=powerbim
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      # - /home/powerbim/certs:/etc/nginx/certs
+      # - /home/powerbim/nginx/conf.d:/etc/nginx/conf.d
+    restart: always
+
+networks:
+  default:
+    external:
+      name: nginx-proxy

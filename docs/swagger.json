@@ -482,6 +482,50 @@
                 }
             }
         },
+        "/bras": {
+            "get": {
+                "description": "get bras",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bras"
+                ],
+                "summary": "List bras",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Bra"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/examples/attribute": {
             "get": {
                 "description": "attribute",
@@ -949,6 +993,31 @@
                 "name": {
                     "type": "string",
                     "example": "bottle_name"
+                }
+            }
+        },
+        "model.Bra": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "metadata": {
+                    "$ref": "#/definitions/model.BraMetadata"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "aaaa"
+                }
+            }
+        },
+        "model.BraMetadata": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "type": "string",
+                    "example": "bbbb"
                 }
             }
         },

@@ -3,29 +3,7 @@ package main
 import (
 	"goprueba/cmd"
 	"goprueba/infrastructure"
-	"os"
-
-	"github.com/go-redis/redis/v7"
 )
-
-var redisClient *redis.Client
-
-func MainRedis() {
-	//Initializing redis
-	dsn := os.Getenv("REDIS_DSN")
-	if len(dsn) == 0 {
-		dsn = "localhost:6379"
-	}
-	redisClient = redis.NewClient(&redis.Options{
-		Addr: dsn, //redis port
-	})
-	_, err := redisClient.Ping().Result()
-	if err != nil {
-		panic(err)
-	}
-
-	infrastructure.SetRedisClient(redisClient)
-}
 
 //var ctx = context.TODO()
 
@@ -74,18 +52,12 @@ func MainRedis() {
 func main() {
 	infrastructure.LoadEnv()
 
+	infrastructure.MainRedis()
+
+	infrastructure.MainMongodb()
+
 	cmd.MainAuth()
 
 	cmd.Sample()
 
 }
-
-// func auth() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		if len(c.GetHeader("Authorization")) == 0 {
-// 			utils.NewError(c, http.StatusUnauthorized, errors.New("Authorization is required Header"))
-// 			c.Abort()
-// 		}
-// 		c.Next()
-// 	}
-// }
