@@ -35,8 +35,10 @@ func Login(c *gin.Context) {
 	}
 
 	fmt.Printf("foundUser: %v\n", foundUser)
+
+	pwdOk := service.CheckPasswordHash(u.Password, foundUser.Password)
 	//compare the user from the request, with the one we defined:
-	if foundUser.Email != u.Email || u.Password != foundUser.Password {
+	if foundUser.Email != u.Email || !pwdOk {
 		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
 		return
 	}
@@ -69,29 +71,6 @@ func Logout(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, "Successfully logged out")
-}
-
-func CreateTodo(c *gin.Context) {
-	var td *dto.Todo
-	if err := c.ShouldBindJSON(&td); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "invalid json")
-		return
-	}
-	tokenAuth, err := service.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
-	}
-	userId, err := service.FetchAuth(tokenAuth)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
-	}
-	td.UserID = userId
-
-	//you can proceed to save the Todo to a database
-	//but we will just return it to the caller here:
-	c.JSON(http.StatusCreated, td)
 }
 
 func Refresh(c *gin.Context) {
@@ -129,7 +108,7 @@ func Refresh(c *gin.Context) {
 			c.JSON(http.StatusUnprocessableEntity, err)
 			return
 		}
-		userId, err := strconv.ParseUint(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
+		userId, err := strconv.ParseInt(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
 		if err != nil {
 			c.JSON(http.StatusUnprocessableEntity, "Error occurred")
 			return
@@ -160,4 +139,34 @@ func Refresh(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusUnauthorized, "refresh expired")
 	}
+}
+
+func CreateUser(c *gin.Context) {
+	var u *dto.User
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "invalid json")
+		return
+	}
+
+	hashPwd, err := service.HashPassword(u.Password)
+	if err != nil {
+		c.JSON(http.StatusNoContent, "fail pwd")
+		return
+	}
+
+	u.Password = hashPwd
+
+	fmt.Printf("hashPwd: %v\n", hashPwd)
+	fmt.Printf("u.Email: %v\n", u.Email)
+
+	//userId, err := c.Get("userId")
+
+	userCreated, err := repository.CreateUser(u)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	fmt.Printf("userCreated: %v\n", userCreated)
+	c.JSON(http.StatusCreated, userCreated)
 }

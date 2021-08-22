@@ -12,13 +12,14 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/twinj/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //jwt service
 type JWTService interface {
 	//GenerateToken(email string, isUser bool) string
-	CreateAuth(userId uint64, t *dto.TokenDetails)
-	CreateToken(userid uint64) (*dto.TokenDetails, error)
+	CreateAuth(userId int64, t *dto.TokenDetails)
+	CreateToken(userid int64) (*dto.TokenDetails, error)
 	VerifyToken(r *http.Request) (*jwt.Token, error)
 }
 
@@ -42,7 +43,7 @@ func getSecretKey() string {
 	return secret
 }
 
-func CreateToken(userid uint64) (*dto.TokenDetails, error) {
+func CreateToken(userid int64) (*dto.TokenDetails, error) {
 	td := &dto.TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	td.AccessUuid = uuid.NewV4().String()
@@ -77,7 +78,7 @@ func CreateToken(userid uint64) (*dto.TokenDetails, error) {
 	return td, nil
 }
 
-func CreateAuth(userid uint64, td *dto.TokenDetails) error {
+func CreateAuth(userid int64, td *dto.TokenDetails) error {
 	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
@@ -135,7 +136,7 @@ func ExtractTokenMetadata(r *http.Request) (*dto.AccessDetails, error) {
 		if !ok {
 			return nil, err
 		}
-		userId, err := strconv.ParseUint(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
+		userId, err := strconv.ParseInt(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -164,4 +165,14 @@ func DeleteAuth(givenUuid string) (int64, error) {
 		return 0, err
 	}
 	return deleted, nil
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

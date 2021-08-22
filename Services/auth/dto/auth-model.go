@@ -17,9 +17,10 @@ type TokenDetails struct {
 }
 
 type User struct {
-	ID uint64 `json:"id"`
+	ID int64 `json:"id"`
 	//	ID       int    `json:"id" example:"1"`
-	Name     string `json:"name" example:"bottle_name"`
+	Name     string `json:"name"`
+	Lastname string `json:"lastName"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
@@ -39,22 +40,5 @@ type authCustomClaims struct {
 
 type AccessDetails struct {
 	AccessUuid string
-	UserId     uint64
-}
-
-type Todo struct {
-	UserID uint64 `json:"user_id"`
-	Title  string `json:"title"`
-}
-
-var UserTest = User{
-	ID:       1,
-	Name:     "username",
-	Email:    "mmmmm",
-	Password: "password",
-	Phone:    "49123454322", //this is a random number
-}
-
-var users = []User{
-	{ID: 1, Email: "juan.ruiz@iwo-os.com", Name: "Juan"},
+	UserId     int64
 }

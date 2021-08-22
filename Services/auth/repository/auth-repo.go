@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"goprueba/Services/auth/dto"
+	"goprueba/infrastructure"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var ctx = context.TODO()
@@ -28,4 +31,25 @@ func GetUserByEmail(email string) (dto.User, error) {
 	fmt.Printf("user!!!!: %v\n", r)
 
 	return r, nil
+}
+
+func CreateUser(user *dto.User) (*mongo.InsertOneResult, error) {
+
+	col := dto.UserCollection()
+
+	fmt.Printf("user: %v\n", user)
+	id := infrastructure.GetSeqId(col)
+
+	fmt.Printf("id: %v\n", id)
+	user.ID = id
+	result, err := col.InsertOne(ctx, user)
+
+	if err != nil {
+		fmt.Println("InsertOne ERROR:", err)
+		os.Exit(1) // safely exit script on error
+	}
+
+	fmt.Printf("created user!!!!: %v\n", result)
+
+	return result, err
 }

@@ -39,3 +39,14 @@ func GetDB() *mongo.Database {
 
 	return DB
 }
+
+func GetSeqId(col *mongo.Collection) int64 {
+	res, err := col.EstimatedDocumentCount(ctx)
+	if err != nil {
+		fmt.Println("seq id ERROR:", err)
+		//os.Exit(1) // safely exit script on error
+		res = 0
+	}
+	res++
+	return res
+}

@@ -30,8 +30,8 @@ func MainAuth() {
 	})
 
 	r.POST("/login", controller.Login)
-	r.POST("/todo", middlewares.TokenAuthMiddleware(), controller.CreateTodo)
-	r.POST("/logout", middlewares.TokenAuthMiddleware(), controller.Logout)
+	r.POST("/user", middlewares.TokenAuthMiddleware(), controller.CreateUser)
+	r.DELETE("/logout", middlewares.TokenAuthMiddleware(), controller.Logout)
 	r.POST("/token/refresh", controller.Refresh)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
