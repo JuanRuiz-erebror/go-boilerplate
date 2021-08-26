@@ -29,6 +29,8 @@ func MainAuth() {
 		})
 	})
 
+	r.Use(middlewares.CORSMiddleware())
+
 	r.POST("/login", controller.Login)
 	r.POST("/user", middlewares.TokenAuthMiddleware(), controller.CreateUser)
 	r.DELETE("/logout", middlewares.TokenAuthMiddleware(), controller.Logout)

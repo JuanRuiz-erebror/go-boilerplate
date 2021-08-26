@@ -28,7 +28,6 @@ func Login(c *gin.Context) {
 	fmt.Printf("u: %v\n", u)
 
 	foundUser, err := repository.GetUserByEmail(u.Email)
-	fmt.Printf("err3333: %v\n", err)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
@@ -52,11 +51,15 @@ func Login(c *gin.Context) {
 	if saveErr != nil {
 		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}
-	tokens := map[string]string{
-		"access_token":  ts.AccessToken,
-		"refresh_token": ts.RefreshToken,
+	tokens := dto.TokenDetails{
+		AccessToken:  ts.AccessToken,
+		RefreshToken: ts.RefreshToken,
 	}
-	c.JSON(http.StatusOK, tokens)
+
+	data := map[string]dto.TokenDetails{
+		"data": tokens,
+	}
+	c.JSON(http.StatusOK, data)
 }
 
 func Logout(c *gin.Context) {

@@ -84,9 +84,9 @@ func CreateAuth(userid int64, td *dto.TokenDetails) error {
 	now := time.Now()
 
 	redisC := infrastructure.RedisClient
-	gg := at.Sub(now)
-	fmt.Printf("gg: %v\n", gg)
-	fmt.Printf("redisC: %v\n", redisC)
+	//gg := at.Sub(now)
+	//fmt.Printf("gg: %v\n", gg)
+	//fmt.Printf("redisC: %v\n", redisC)
 	errAccess := redisC.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
 	if errAccess != nil {
 		return errAccess
